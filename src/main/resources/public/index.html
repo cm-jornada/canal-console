@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app" >
+    <a>/root/{{ path }}</a></p>
+    <div v-if="rootFlag">
+        <ol>
+            <li v-for="d in destinations">
+                <a v-model="d" @click="getChildren(d)">{{ d }}</a>
+            </li>
+        </ol>
+    </div>
+
+    <div v-if="!rootFlag">
+        <a>地址：{{ backData.address }}</a></p>
+        <a>有效：{{ backData.active }}</a></p>
+    </div>
+    <button @click="getRoot()">back</button>
+</div>
+</body>
+<!--<script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+</html>
+
+<script>
+  var app;
+  app = new Vue({
+    el: '#app',
+    data: {
+      destinations: '',
+      path: '',
+      rootFlag: true,
+      dataMap: {},
+      backData: {},
+    },
+    mounted: function () {
+      this.$nextTick(function () {
+        this.getRoot();
+      })
+    },
+    methods: {
+      getRoot: function () {
+        //发送get请求
+        this.$http.get('getRoot').then(function (res) {
+          this.destinations = res.data;
+          this.rootFlag = true;
+          for (const i in res.data) {
+            this.dataMap[res.data[i]] = res.data[i];
+          }
+        }, function () {
+          alert('请求失败处理'); //失败处理
+        });
+      },
+      getChildren: function (destination) {
+        destination = this.dataMap[destination];
+        var indexOf = destination.indexOf('running');
+        var objFlag = indexOf > 0 && indexOf != destination.length - 'running'.length;
+        if (objFlag || destination.indexOf('cursor') > 0) {
+          return;
+        }
+        this.path = destination;
+        this.$http.get('getChildren?destination=' + destination).then(function (res) {
+          if (indexOf == destination.length - 'running'.length){
+            this.rootFlag = false;
+            this.backData = JSON.parse(res.data);
+          }else {
+            this.destinations = res.data;
+          }
+          for (const i in res.data) {
+            this.dataMap[res.data[i]] = destination + '/' + res.data[i];
+          }
+        }, function () {
+          console.log('请求失败处理'); //失败处理
+        });
+      },
+    },
+  });
+</script>
