@@ -27,11 +27,11 @@ public class DataOutput {
     @ResponseBody
     @RequestMapping("getChildren")
     public List<String> getChildren(HttpServletRequest request) {
-        String destination = request.getParameter("destination");
-        String path = ZookeeperPathUtils.DESTINATION_ROOT_NODE + ZookeeperPathUtils.ZOOKEEPER_SEPARATOR + destination;
-        List<String> childrenList = zkClient.getChildren(path);
+        String path = request.getParameter("path");
+        String fullPath = ZookeeperPathUtils.DESTINATION_ROOT_NODE + ZookeeperPathUtils.ZOOKEEPER_SEPARATOR + path;
+        List<String> childrenList = zkClient.getChildren(fullPath);
         if (CollectionUtils.isEmpty(childrenList)) {
-            String str = zkClient.readData(path);
+            String str = zkClient.readData(fullPath);
             childrenList.add(str);
         }
         return childrenList;

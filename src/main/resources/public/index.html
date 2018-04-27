@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<style type="text/css">
+    div{ font-size: 18px;}
+    button{ font-size: 18px;}
+    select{ font-size: 18px;}
+</style>
+
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
-<div id="app" >
+<div id="app">
+    <H3>destination目录</H3>
     <a>/root/{{ path }}</a></p>
     <div v-if="rootFlag">
         <ol>
@@ -20,6 +28,21 @@
         <a>有效：{{ backData.active }}</a></p>
     </div>
     <button @click="getRoot()">back</button>
+
+
+    <H3>destination搜索</H3>
+    <div>
+        <select v-model="selected">
+            <option value="/running">服务端</option>
+            <option value="/1001/running">客户端</option>
+        </select>
+        <a>destination：</a><input v-model="destination">
+        <button @click="getNode(destination+selected)">search</button>
+    </div>
+    <div style="margin-top: 12px">
+        <a>地址：{{ node.address }}</a></p>
+        <a>有效：{{ node.active }}</a></p>
+    </div>
 </div>
 </body>
 <!--<script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>-->
@@ -34,9 +57,12 @@
     data: {
       destinations: '',
       path: '',
+      selected: '/running',
+      destination: '',
       rootFlag: true,
       dataMap: {},
       backData: {},
+      node: {},
     },
     mounted: function () {
       this.$nextTick(function () {
@@ -44,8 +70,16 @@
       })
     },
     methods: {
+      init: function () {
+        this.destinations = '';
+        this.path = '';
+        this.rootFlag = true;
+        this.dataMap = {};
+        this.backData = {};
+      },
       getRoot: function () {
-        //发送get请求
+        this.init();
+        //获取destination
         this.$http.get('getRoot').then(function (res) {
           this.destinations = res.data;
           this.rootFlag = true;
@@ -53,27 +87,38 @@
             this.dataMap[res.data[i]] = res.data[i];
           }
         }, function () {
-          alert('请求失败处理'); //失败处理
+          console.log('请求失败处理'); //失败处理
         });
       },
-      getChildren: function (destination) {
-        destination = this.dataMap[destination];
-        var indexOf = destination.indexOf('running');
-        var objFlag = indexOf > 0 && indexOf != destination.length - 'running'.length;
-        if (objFlag || destination.indexOf('cursor') > 0) {
+      getChildren: function (path) {
+        path = this.dataMap[path];
+        var indexOf = path.indexOf('running');
+        var objFlag = indexOf > 0 && indexOf != path.length - 'running'.length;
+        if (objFlag || path.indexOf('cursor') > 0) {
           return;
         }
-        this.path = destination;
-        this.$http.get('getChildren?destination=' + destination).then(function (res) {
-          if (indexOf == destination.length - 'running'.length){
+        this.path = path;
+        this.$http.get('getChildren?path=' + path).then(function (res) {
+          if (indexOf == path.length - 'running'.length) {
             this.rootFlag = false;
             this.backData = JSON.parse(res.data);
-          }else {
+          } else {
             this.destinations = res.data;
           }
           for (const i in res.data) {
-            this.dataMap[res.data[i]] = destination + '/' + res.data[i];
+            this.dataMap[res.data[i]] = path + '/' + res.data[i];
           }
+        }, function () {
+          console.log('请求失败处理'); //失败处理
+        });
+      },
+      getNode: function (path) {
+        if (!this.destination){
+          alert("please enter destination");
+          return;
+        }
+        this.$http.get('getChildren?path=' + path).then(function (res) {
+          this.node = JSON.parse(res.data);
         }, function () {
           console.log('请求失败处理'); //失败处理
         });
