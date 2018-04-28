@@ -2,9 +2,22 @@
 <html lang="en">
 
 <style type="text/css">
-    div{ font-size: 18px;}
-    button{ font-size: 18px;}
-    select{ font-size: 18px;}
+    div {
+        font-size: 18px;
+    }
+
+    select {
+        font-size: 18px;
+    }
+
+    .btn {
+        font-size: 18px;
+        width: 120px;
+        height: 30px;
+        background: #ccc;
+        border: 1px solid #eee;
+        border-radius: 12px;
+    }
 </style>
 
 <head>
@@ -18,7 +31,7 @@
     <div v-if="rootFlag">
         <ol>
             <li v-for="d in destinations">
-                <a v-model="d" @click="getChildren(d)">{{ d }}</a>
+                <a v-model="d" @click="getChildren(d)" href="#">{{ d }}</a>
             </li>
         </ol>
     </div>
@@ -27,7 +40,7 @@
         <a>地址：{{ backData.address }}</a></p>
         <a>有效：{{ backData.active }}</a></p>
     </div>
-    <button @click="getRoot()">back</button>
+    <button @click="getRoot()" class="btn">back</button>
 
 
     <H3>destination搜索</H3>
@@ -37,7 +50,7 @@
             <option value="/1001/running">客户端</option>
         </select>
         <a>destination：</a><input v-model="destination">
-        <button @click="getNode(destination+selected)">search</button>
+        <button @click="getNode(destination+selected)" class="btn">search</button>
     </div>
     <div style="margin-top: 12px">
         <a>地址：{{ node.address }}</a></p>
@@ -113,7 +126,7 @@
         });
       },
       getNode: function (path) {
-        if (!this.destination){
+        if (!this.destination) {
           alert("please enter destination");
           return;
         }
